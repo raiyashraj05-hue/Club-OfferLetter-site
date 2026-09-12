@@ -13,8 +13,33 @@ const COLUMN_MAPPINGS = {
   phone: ['phone', 'mobile', 'contact', 'phone_number'],
   college: ['college', 'institution', 'university'],
   registrationNumber: ['registration_number', 'registration number', 'reg no', 'reg_number'],
+  batch: ['batch', 'student_batch', 'passing_year', 'grad_year', 'graduation_year'],
   documentFilename: ['document_filename', 'document filename', 'filename', 'file']
 };
+
+export function deriveStudentBatch(explicitBatch, regNo, email) {
+  if (explicitBatch && String(explicitBatch).trim()) {
+    const cleaned = String(explicitBatch).trim().replace(/^['"]|['"]$/g, '');
+    if (cleaned) return cleaned;
+  }
+  if (regNo && typeof regNo === 'string') {
+    const match = regNo.trim().match(/^(\d{2})[a-zA-Z]/);
+    if (match) {
+      const year = parseInt(match[1], 10);
+      if (!isNaN(year)) {
+        const batchYear = (year + 4) % 100;
+        return String(batchYear).padStart(2, '0');
+      }
+    }
+  }
+  if (email && typeof email === 'string') {
+    const match = email.match(/(?:20)?(\d{2})@/);
+    if (match) {
+      return match[1];
+    }
+  }
+  return '25';
+}
 
 export function autoMapHeaders(rawHeaders) {
   const mapping = {};
@@ -162,6 +187,8 @@ export function parseAndValidateXLSX(fileBuffer) {
     const phone = getValue('phone');
     const college = getValue('college');
     const regNo = getValue('registrationNumber');
+    const explicitBatch = getValue('batch');
+    const batch = deriveStudentBatch(explicitBatch, regNo, email);
     const docFilename = getValue('documentFilename');
 
     const issues = [];
@@ -198,6 +225,7 @@ export function parseAndValidateXLSX(fileBuffer) {
       phone,
       college,
       registrationNumber: regNo,
+      batch,
       documentFilename: docFilename,
       statusCategory: rowStatus,
       issues

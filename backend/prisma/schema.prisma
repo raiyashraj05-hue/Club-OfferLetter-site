@@ -26,6 +26,7 @@ model Appointment {
   position           String
   department         String
   team               String?
+  batch              String?
   appointmentDate    String
   joiningDate        String?
   duration           String?

@@ -13,7 +13,7 @@ import { createClient } from '@libsql/client';
 import { PrismaLibSQL } from '@prisma/adapter-libsql';
 
 import { generateAppointmentPDF } from './pdfGenerator.js';
-import { parseAndValidateXLSX } from './xlsxParser.js';
+import { parseAndValidateXLSX, deriveStudentBatch } from './xlsxParser.js';
 import { authenticateAdmin } from './authMiddleware.js';
 
 dotenv.config();
@@ -163,6 +163,7 @@ app.post('/api/appointments/verify', async (req, res) => {
         appointmentDate: appointment.appointmentDate,
         joiningDate: appointment.joiningDate,
         duration: appointment.duration,
+        batch: appointment.batch || deriveStudentBatch(appointment.batch, appointment.registrationNumber, appointment.email),
         status: appointment.status,
         hasDocument: !!appointment.documentUrl
       }
@@ -334,6 +335,11 @@ app.get('/api/admin/appointments', authenticateAdmin, async (req, res) => {
       orderBy: { [sortBy]: sortOrder }
     });
 
+    const appointmentsWithBatch = appointments.map(appt => ({
+      ...appt,
+      batch: appt.batch || deriveStudentBatch(appt.batch, appt.registrationNumber, appt.email)
+    }));
+
     return res.json({
       ok: true,
       pagination: {
@@ -342,7 +348,7 @@ app.get('/api/admin/appointments', authenticateAdmin, async (req, res) => {
         totalRecords,
         totalPages
       },
-      appointments
+      appointments: appointmentsWithBatch
     });
   } catch (err) {
     console.error('Fetch appointments error:', err);
@@ -357,7 +363,13 @@ app.get('/api/admin/appointments/:id', authenticateAdmin, async (req, res) => {
     if (!appointment) {
       return res.status(404).json({ ok: false, error: 'Appointment record not found.' });
     }
-    return res.json({ ok: true, appointment });
+    return res.json({
+      ok: true,
+      appointment: {
+        ...appointment,
+        batch: appointment.batch || deriveStudentBatch(appointment.batch, appointment.registrationNumber, appointment.email)
+      }
+    });
   } catch (err) {
     return res.status(500).json({ ok: false, error: 'Error fetching record.' });
   }
@@ -397,6 +409,9 @@ app.post('/api/admin/appointments', authenticateAdmin, upload.single('document')
       documentFilename = req.file.originalname;
     }
 
+    const regNo = String(body.registrationNumber || '').trim();
+    const batch = body.batch ? String(body.batch).trim() : deriveStudentBatch(null, regNo, email);
+
     const newAppt = await prisma.appointment.create({
       data: {
         appointmentId,
@@ -405,13 +420,14 @@ app.post('/api/admin/appointments', authenticateAdmin, upload.single('document')
         position,
         department,
         team,
+        batch,
         appointmentDate,
         joiningDate: body.joiningDate || null,
         duration: body.duration || null,
         status: body.status || 'Verified',
         phone: body.phone || null,
         college: body.college || null,
-        registrationNumber: body.registrationNumber || null,
+        registrationNumber: regNo || null,
         documentUrl,
         documentFilename
       }
@@ -443,6 +459,7 @@ app.put('/api/admin/appointments/:id', authenticateAdmin, upload.single('documen
       position: body.position !== undefined ? String(body.position).trim() : existing.position,
       department: body.department !== undefined ? String(body.department).trim() : existing.department,
       team: body.team !== undefined ? String(body.team).trim() : existing.team,
+      batch: body.batch !== undefined ? String(body.batch).trim() : existing.batch,
       appointmentDate: body.appointmentDate !== undefined ? String(body.appointmentDate).trim() : existing.appointmentDate,
       joiningDate: body.joiningDate !== undefined ? String(body.joiningDate).trim() : existing.joiningDate,
       duration: body.duration !== undefined ? String(body.duration).trim() : existing.duration,
@@ -603,7 +620,8 @@ app.post('/api/admin/import/confirm', authenticateAdmin, async (req, res) => {
                 status: row.status || existing.status,
                 phone: row.phone || existing.phone,
                 college: row.college || existing.college,
-                registrationNumber: row.registrationNumber || existing.registrationNumber
+                registrationNumber: row.registrationNumber || existing.registrationNumber,
+                batch: row.batch || deriveStudentBatch(row.batch, row.registrationNumber, row.email)
               }
             });
             updatedCount++;
@@ -620,6 +638,7 @@ app.post('/api/admin/import/confirm', authenticateAdmin, async (req, res) => {
             position: row.position,
             department: row.department,
             team: row.department,
+            batch: row.batch || deriveStudentBatch(row.batch, row.registrationNumber, row.email),
             appointmentDate: row.appointmentDate || '20/08/2026',
             joiningDate: row.joiningDate || null,
             duration: row.duration || null,

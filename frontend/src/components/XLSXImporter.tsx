@@ -11,6 +11,7 @@ interface XLSXRow {
   email: string;
   position: string;
   department: string;
+  batch?: string;
   appointmentDate: string;
   statusCategory: 'VALID' | 'ATTENTION' | 'INVALID';
   issues: string[];
@@ -316,6 +317,7 @@ export const XLSXImporter: React.FC<XLSXImporterProps> = ({ onComplete }) => {
                   <th className="p-3">Email</th>
                   <th className="p-3">Position</th>
                   <th className="p-3">Department</th>
+                  <th className="p-3">Batch</th>
                   <th className="p-3">Status</th>
                 </tr>
               </thead>
@@ -328,6 +330,7 @@ export const XLSXImporter: React.FC<XLSXImporterProps> = ({ onComplete }) => {
                     <td className="p-3">{r.email || '—'}</td>
                     <td className="p-3">{r.position}</td>
                     <td className="p-3">{r.department}</td>
+                    <td className="p-3 font-bold text-slate-200">{r.batch ? `'${r.batch}` : "'25"}</td>
                     <td className="p-3">
                       {r.statusCategory === 'VALID' ? (
                         <span className="text-emerald-400 font-bold">✓ Valid</span>

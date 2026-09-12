@@ -23,6 +23,7 @@ export const AddEditAppointmentModal: React.FC<AddEditModalProps> = ({
   const [position, setPosition] = useState('');
   const [department, setDepartment] = useState('Technical');
   const [team, setTeam] = useState('Technical Team');
+  const [batch, setBatch] = useState('25');
   const [appointmentId, setAppointmentId] = useState('');
   const [appointmentDate, setAppointmentDate] = useState('20/08/2026');
   const [joiningDate, setJoiningDate] = useState('01/09/2026');
@@ -43,6 +44,7 @@ export const AddEditAppointmentModal: React.FC<AddEditModalProps> = ({
       setPosition(initialData.position || '');
       setDepartment(initialData.department || 'Technical');
       setTeam(initialData.team || initialData.department || 'Technical Team');
+      setBatch(initialData.batch || '25');
       setAppointmentId(initialData.appointmentId || '');
       setAppointmentDate(initialData.appointmentDate || '20/08/2026');
       setStatus(initialData.status || 'Verified');
@@ -52,6 +54,7 @@ export const AddEditAppointmentModal: React.FC<AddEditModalProps> = ({
       setPosition('');
       setDepartment('Technical');
       setTeam('Technical Team');
+      setBatch('25');
       setAppointmentId('');
       setAppointmentDate('20/08/2026');
       setStatus('Verified');
@@ -78,6 +81,7 @@ export const AddEditAppointmentModal: React.FC<AddEditModalProps> = ({
     formData.append('position', position.trim());
     formData.append('department', department.trim());
     formData.append('team', team.trim());
+    formData.append('batch', batch.trim());
     formData.append('appointmentId', appointmentId.trim());
     formData.append('appointmentDate', appointmentDate.trim());
     formData.append('joiningDate', joiningDate.trim());
@@ -180,8 +184,18 @@ export const AddEditAppointmentModal: React.FC<AddEditModalProps> = ({
               <select
                 value={department}
                 onChange={(e) => {
-                  setDepartment(e.target.value);
-                  setTeam(`${e.target.value} Team`);
+                  const val = e.target.value;
+                  setDepartment(val);
+                  setTeam(val === 'Panel' ? 'Panel' : `${val} Team`);
+                  if (val === 'Panel') {
+                    if (!['President', 'Vice President', 'General Secretary', 'Joint Secretary', 'Operations Manager'].includes(position)) {
+                      setPosition('General Secretary');
+                    }
+                  } else if (val === 'Social Media') {
+                    if (!['Social Media Lead', 'Social Media Co-Lead', 'Social Media Core Member'].includes(position)) {
+                      setPosition('Social Media Core Member');
+                    }
+                  }
                 }}
                 className="w-full px-3.5 py-2.5 bg-[#050B14] border border-slate-800 focus:border-[#00F0FF] rounded-xl text-sm text-white outline-none"
               >
@@ -191,7 +205,53 @@ export const AddEditAppointmentModal: React.FC<AddEditModalProps> = ({
                 <option value="Management">Management</option>
                 <option value="Photography">Photography</option>
                 <option value="Research">Research</option>
+                <option value="Social Media">Social Media</option>
+                <option value="Panel">Panel</option>
               </select>
+            </div>
+
+            {department === 'Panel' && (
+              <div>
+                <label className="block text-xs font-mono font-bold text-[#00F0FF] uppercase mb-1">PANEL ROLE DROPDOWN *</label>
+                <select
+                  value={position}
+                  onChange={(e) => setPosition(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-[#050B14] border-2 border-[#00F0FF]/60 focus:border-[#00F0FF] rounded-xl text-sm text-white outline-none font-semibold shadow-[0_0_15px_rgba(0,240,255,0.2)]"
+                >
+                  <option value="President">President</option>
+                  <option value="Vice President">Vice President</option>
+                  <option value="General Secretary">General Secretary</option>
+                  <option value="Joint Secretary">Joint Secretary</option>
+                  <option value="Operations Manager">Operations Manager</option>
+                </select>
+              </div>
+            )}
+
+            {department === 'Social Media' && (
+              <div>
+                <label className="block text-xs font-mono font-bold text-[#00F0FF] uppercase mb-1">SOCIAL MEDIA DROPDOWN *</label>
+                <select
+                  value={position}
+                  onChange={(e) => setPosition(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-[#050B14] border-2 border-[#00F0FF]/60 focus:border-[#00F0FF] rounded-xl text-sm text-white outline-none font-semibold shadow-[0_0_15px_rgba(0,240,255,0.2)]"
+                >
+                  <option value="Social Media Lead">Social Media Lead</option>
+                  <option value="Social Media Co-Lead">Social Media Co-Lead</option>
+                  <option value="Social Media Core Member">Social Media Core Member</option>
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-1">STUDENT BATCH *</label>
+              <input
+                type="text"
+                value={batch}
+                onChange={(e) => setBatch(e.target.value)}
+                placeholder="e.g. 25, 26, 27"
+                required
+                className="w-full px-3.5 py-2.5 bg-[#050B14] border border-slate-800 focus:border-[#00F0FF] rounded-xl text-sm text-white outline-none font-mono"
+              />
             </div>
 
             <div>

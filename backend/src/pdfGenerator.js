@@ -28,9 +28,22 @@ function classifyRole(p) {
   return 'core';
 }
 
+function getAcademicYear(batchStr) {
+  if (!batchStr) return '2025–2026';
+  const b = String(batchStr).trim();
+  let startYear = 2025;
+  if (/^\d{4}$/.test(b)) {
+    startYear = parseInt(b, 10);
+  } else if (/^\d{2}$/.test(b)) {
+    startYear = 2000 + parseInt(b, 10);
+  }
+  return `${startYear}–${startYear + 1}`;
+}
+
 // ── Content lookup: keyed by "team|position" (lowercase, trimmed) ─────────────
 // Returns { para1, para2, para3, responsibilitiesHeading, bullets, closing }
-function getContent(team, position) {
+function getContent(team, position, batch) {
+  const acadYear = getAcademicYear(batch);
   const t = team.toLowerCase().trim();
   const p = position.toLowerCase().trim();
   const role = classifyRole(p); // 'lead' | 'colead' | 'core'
@@ -41,7 +54,7 @@ function getContent(team, position) {
   // ── PANEL ──────────────────────────────────────────────────────────────────
   if (t.includes('panel') || t === '') {
     if (p.includes('president') && !p.includes('vice')) return {
-      para1: `We are pleased to inform you that you have been appointed as the President of the Stats-O-Locked Club for the Academic Year 2025–2026.`,
+      para1: `We are pleased to inform you that you have been appointed as the President of the Stats-O-Locked Club for the Academic Year ${acadYear}.`,
       para2: `This appointment recognizes your leadership qualities, dedication, and enthusiasm towards data, statistics, and collaborative growth. As President, you are entrusted with the crucial responsibility of rebuilding, restructuring, and strengthening the Stats-O-Locked Club, including revitalizing its core team and members to establish a strong, active, and sustainable organization.`,
       para3: `In your role, you will be responsible for providing strategic direction, overseeing club operations, coordinating with faculty advisors, and ensuring the smooth and effective functioning of all departments. You are also expected to foster renewed engagement among members and guide the club toward achieving its vision with a fresh and impactful approach.`,
       responsibilitiesHeading: 'Your responsibilities include:',
@@ -56,7 +69,7 @@ function getContent(team, position) {
     };
 
     if (p.includes('vice')) return {
-      para1: `We are pleased to inform you that you have been appointed as the Vice President of the Stats-O-Locked Club for the Academic Year 2025–2026.`,
+      para1: `We are pleased to inform you that you have been appointed as the Vice President of the Stats-O-Locked Club for the Academic Year ${acadYear}.`,
       para2: `This appointment reflects our confidence in your ability to support leadership initiatives and contribute meaningfully to the club's growth. As Vice President, you will play a key role in assisting the President in rebuilding, restructuring, and strengthening the Stats-O-Locked Club, including reviving member engagement and ensuring effective coordination across all domains.`,
       para3: `In this role, you will assist in planning and execution of activities, support strategic decision-making, and assume leadership responsibilities in the absence of the President when required. Your contribution will be vital in establishing a strong operational framework and an active, collaborative club culture.`,
       responsibilitiesHeading: 'Your responsibilities include:',
@@ -71,7 +84,7 @@ function getContent(team, position) {
     };
 
     if (p.includes('general secretary') || p.includes('gen sec')) return {
-      para1: `We are pleased to inform you that you have been appointed as the General Secretary of the Stats-O-Locked Club for the Academic Year 2025–2026.`,
+      para1: `We are pleased to inform you that you have been appointed as the General Secretary of the Stats-O-Locked Club for the Academic Year ${acadYear}.`,
       para2: `This appointment recognizes your organizational skills, reliability, and attention to detail. As General Secretary, you will play a vital role in supporting the rebuilding and restructuring of the Stats-O-Locked Club, ensuring smooth administration, effective communication, and strong coordination among the core team members and faculty.`,
       para3: `In this role, you will manage official documentation, communications, meeting records, and internal coordination, which are essential for establishing a transparent, efficient, and well-functioning club structure during its revitalization phase.`,
       responsibilitiesHeading: 'Your duties include:',
@@ -86,7 +99,7 @@ function getContent(team, position) {
     };
 
     if (p.includes('joint secretary') || p.includes('joint sec')) return {
-      para1: `We are pleased to inform you that you have been appointed as the Joint Secretary of the Stats-O-Locked Club for the Academic Year 2025–2026.`,
+      para1: `We are pleased to inform you that you have been appointed as the Joint Secretary of the Stats-O-Locked Club for the Academic Year ${acadYear}.`,
       para2: `This appointment recognizes your organizational skills, reliability, and commitment to supporting the club's administration. As Joint Secretary, you will assist the General Secretary in the rebuilding and restructuring of the Stats-O-Locked Club, helping ensure smooth administration, effective communication, and strong coordination among the core team members and faculty.`,
       para3: `In this role, you will support official documentation, communications, meeting records, and internal coordination, contributing to a transparent, efficient, and well-functioning club structure during its revitalization phase.`,
       responsibilitiesHeading: 'Your duties include:',
@@ -101,7 +114,7 @@ function getContent(team, position) {
     };
 
     if (p.includes('operations')) return {
-      para1: `We are pleased to inform you that you have been appointed as the Operations Manager of the Stats-O-Locked Club for the Academic Year 2026–2027.`,
+      para1: `We are pleased to inform you that you have been appointed as the Operations Manager of the Stats-O-Locked Club for the Academic Year ${acadYear}.`,
       para2: `This appointment recognizes your leadership abilities, management skills, and dedication toward ensuring smooth and efficient club functioning. As Operations Manager, you will play a key role in supporting the rebuilding and restructuring of the Stats-O-Locked Club by overseeing operational activities, streamlining coordination, and ensuring the successful execution of club initiatives and events.`,
       para3: `In this role, you will be responsible for managing workflows, coordinating between departments, and ensuring that all club activities are conducted effectively and professionally during this revitalization phase.`,
       responsibilitiesHeading: 'Your duties include:',
@@ -549,7 +562,7 @@ function getContent(team, position) {
 
   // ── FALLBACK ──────────────────────────────────────────────────────────────
   return {
-    para1: `We are pleased to inform you that you have been appointed as the ${position} of the ${team} for the academic year 2025–2026 at the Stats-O-Locked Club, VIT Bhopal University.`,
+    para1: `We are pleased to inform you that you have been appointed as the ${position} of the ${team} for the academic year ${acadYear} at the Stats-O-Locked Club, VIT Bhopal University.`,
     para2: `This appointment reflects our confidence in your skills, dedication, and commitment to excellence. You are expected to contribute actively to the team's success and the club's growth.`,
     para3: '',
     responsibilitiesHeading: 'Roles and Responsibilities:',
@@ -632,7 +645,7 @@ export async function generateAppointmentPDF(appointment) {
   const dateStr = formatDate(appointment.appointmentDate);
   const team    = appointment.team || appointment.department || '';
   const pos     = appointment.position || 'Core Member';
-  const content = getContent(team, pos);
+  const content = getContent(team, pos, appointment.batch);
 
   // ── 1. Name & Date — overlay onto template's existing "Dear," and "Date:" labels ──
   // The template already has "Dear," and "Date:" printed on it.

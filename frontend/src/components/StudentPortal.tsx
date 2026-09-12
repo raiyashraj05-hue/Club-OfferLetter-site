@@ -13,7 +13,8 @@ import {
   Calendar,
   Award,
   Hash,
-  Building2
+  Building2,
+  GraduationCap
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { PDFViewerModal } from './PDFViewerModal';
@@ -34,6 +35,7 @@ interface AppointmentRecord {
   appointmentDate: string;
   joiningDate?: string;
   duration?: string;
+  batch?: string;
   status: string;
   hasDocument: boolean;
 }
@@ -325,6 +327,16 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ onOpenAdmin }) => 
                     </span>
                     <p className="font-sans font-semibold text-slate-300 text-sm truncate">
                       {appointment.email}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="text-xs font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <GraduationCap className="w-3.5 h-3.5 text-[#00F0FF]" />
+                      BATCH
+                    </span>
+                    <p className="font-mono font-bold text-slate-200">
+                      Batch '{appointment.batch || '25'}
                     </p>
                   </div>
 

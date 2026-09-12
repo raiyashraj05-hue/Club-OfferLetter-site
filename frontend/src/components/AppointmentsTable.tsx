@@ -9,6 +9,7 @@ export interface AppointmentItem {
   position: string;
   department: string;
   team?: string;
+  batch?: string;
   appointmentDate: string;
   status: string;
   documentUrl?: string;
@@ -102,6 +103,10 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
             <option value="Events">Events</option>
             <option value="Creative">Creative</option>
             <option value="Management">Management</option>
+            <option value="Photography">Photography</option>
+            <option value="Research">Research</option>
+            <option value="Social Media">Social Media</option>
+            <option value="Panel">Panel</option>
           </select>
 
           {/* Sort By */}
@@ -132,6 +137,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                 <th className="py-3.5 px-4">Email</th>
                 <th className="py-3.5 px-4">Position</th>
                 <th className="py-3.5 px-4">Department</th>
+                <th className="py-3.5 px-4">Batch</th>
                 <th className="py-3.5 px-4">Date</th>
                 <th className="py-3.5 px-4">Status</th>
                 <th className="py-3.5 px-4">Document</th>
@@ -142,7 +148,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
             <tbody className="divide-y divide-slate-800/60 text-sm">
               {appointments.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-500 font-mono text-sm">
+                  <td colSpan={10} className="py-12 text-center text-slate-500 font-mono text-sm">
                     <FileX className="w-8 h-8 mx-auto mb-2 text-slate-600" />
                     NO APPOINTMENTS FOUND
                     <p className="text-xs text-slate-600 mt-1">Try changing your search query or add a new appointment record.</p>
@@ -167,6 +173,9 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                       <span className="px-2.5 py-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-xs font-semibold">
                         {appt.department}
                       </span>
+                    </td>
+                    <td className="py-3.5 px-4 font-mono text-slate-300 text-xs font-bold">
+                      {appt.batch ? `'${appt.batch}` : "'25"}
                     </td>
                     <td className="py-3.5 px-4 text-xs font-mono text-slate-300">
                       {appt.appointmentDate}
